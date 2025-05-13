@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Products</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
+    .sidebar { width: 200px; background: #333; position: fixed; height: 100%; padding: 20px; color: white; }
+    .sidebar a { color: white; text-decoration: none; display: block; padding: 10px; margin: 5px 0; }
+    .sidebar a:hover { background: #4CAF50; }
+    .main-content { margin-left: 220px; padding: 20px; }
+    .header { background: #f1f1f1; padding: 10px 20px; display: flex; justify-content: space-between; }
+    .logout-btn { background: #f44336; color: white; border: none; padding: 8px 15px; cursor: pointer; }
+    .profile-btn { background: #4CAF50; color: white; border: none; padding: 8px 15px; cursor: pointer; }
+    .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; }
+    .product-card { border: 1px solid #ddd; padding: 15px; border-radius: 5px; }
+    .error-message { color: red; padding: 10px; background: #ffeeee; margin-bottom: 20px; }
+    .loading { text-align: center; padding: 20px; }
+  </style>
+</head>
+<body>
+  <div class="sidebar">
+    <h2>Menu</h2>
+    <a href="/client/products">Products</a>
+    <a href="/client/plants">Plants</a>
+    <a href="/client/other-plants">Plants +</a>
+    <a href="/client/profile">My Profile</a>
+  </div>
+
+  <div class="main-content">
+    <div class="header">
+      <h1>Products</h1>
+      <div>
+        <button class="profile-btn" onclick="window.location.href='/client/profile'">Profile</button>
+        <button class="logout-btn" id="client-logout">Logout</button>
+      </div>
+    </div>
+    
+    <div id="error-message" class="error-message" style="display: none;"></div>
+    <div id="loading" class="loading">Loading products...</div>
+    <div class="product-grid" id="products-container">
+      <!-- Products will be loaded here -->
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const API_BASE_URL = "http://localhost:4002/api/products/client";
+      const authToken = localStorage.getItem('clientToken');
+      const errorElement = document.getElementById('error-message');
+      const loadingElement = document.getElementById('loading');
+      const productsContainer = document.getElementById('products-container');
+      
+      // Check authentication
+      if (!authToken) {
+        window.location.href = '/client/login';
+        return;
+      }
+
+      // Load products
+      loadProducts();
+
+      async function loadProducts() {
+        try {
+          const response = await fetch(API_BASE_URL, {
+            headers: { 
+                'Authorization': `Bearer ${authToken}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+          if (response.status === 401) {
+            handleUnauthorized();
+            return;
+          }
+
+          if (!response.ok) {
+            throw new Error('Failed to fetch products');
+          }
+
+          const products = await response.json();
+          
+          if (!Array.isArray(products)) {
+            throw new Error('Invalid products data received');
+          }
+
+          renderProducts(products);
+        } catch (error) {
+          console.error('Error:', error);
+          showError(error.message);
+        } finally {
+          loadingElement.style.display = 'none';
+        }
+      }
+
+      function renderProducts(products) {
+        productsContainer.innerHTML = '';
+        
+        if (products.length === 0) {
+          productsContainer.innerHTML = '<p>No products available</p>';
+          return;
+        }
+
+        products.forEach(product => {
+          const card = document.createElement('div');
+          card.className = 'product-card';
+          card.innerHTML = `
+            <h3>${product.nom || 'No name'}</h3>
+            ${product.image ? `<img src="${product.image}" alt="${product.nom}" style="max-width:100%;">` : ''}
+            <p>${product.description || 'No description'}</p>
+            <p>Price: $${product.prix || 'N/A'}</p>
+            <p>Stock: ${product.stock || 0}</p>
+          `;
+          productsContainer.appendChild(card);
+        });
+      }
+
+      // Logout handler
+      document.getElementById('client-logout').addEventListener('click', () => {
+        localStorage.removeItem('clientToken');
+        window.location.href = '/client/login';
+      });
+
+      function showError(message) {
+        errorElement.textContent = message;
+        errorElement.style.display = 'block';
+        setTimeout(() => {
+          errorElement.style.display = 'none';
+        }, 5000);
+      }
+
+      function handleUnauthorized() {
+        localStorage.removeItem('clientToken');
+        window.location.href = '/client/login';
+      }
+    });
+  </script>
+</body>
+</html>

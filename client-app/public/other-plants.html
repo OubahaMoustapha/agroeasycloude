@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Plants</title>
+  <style>
+    /* Your existing CSS remains unchanged */
+    body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
+    .sidebar { width: 200px; background: #333; position: fixed; height: 100%; padding: 20px; color: white; }
+    .sidebar a { color: white; text-decoration: none; display: block; padding: 10px; margin: 5px 0; }
+    .sidebar a:hover { background: #4CAF50; }
+    .main-content { margin-left: 220px; padding: 20px; }
+    .header { background: #f1f1f1; padding: 10px 20px; display: flex; justify-content: space-between; }
+    .logout-btn { background: #f44336; color: white; border: none; padding: 8px 15px; cursor: pointer; }
+    .profile-btn { background: #4CAF50; color: white; border: none; padding: 8px 15px; cursor: pointer; }
+    .plant-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; }
+    .plant-card { border: 1px solid #ddd; padding: 15px; border-radius: 5px; }
+    .error-message { color: red; padding: 10px; background: #ffeeee; margin-bottom: 20px; }
+    .loading { text-align: center; padding: 20px; }
+    .search-container { margin-bottom: 20px; }
+    .search-input { padding: 8px; width: 300px; }
+    .search-btn { padding: 8px 15px; background: #4CAF50; color: white; border: none; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <!-- Your existing HTML remains unchanged -->
+  <div class="sidebar">
+    <h2>Menu</h2>
+    <a href="/client/products">Products</a>
+    <a href="/client/plants">Plants</a>
+    <a href="/client/others-plants">Plants +</a>
+    <a href="/client/profile">My Profile</a>
+  </div>
+
+  <div class="main-content">
+    <div class="header">
+      <h1>Plants</h1>
+      <div>
+        <button class="profile-btn" onclick="window.location.href='/client/profile'">Profile</button>
+        <button class="logout-btn" id="client-logout">Logout</button>
+      </div>
+    </div>
+
+    <div class="search-container">
+      <input type="text" id="plant-search" class="search-input" placeholder="Search plants (e.g., tomato)">
+      <button class="search-btn" onclick="searchPlants()">Search</button>
+    </div>
+
+    <div id="error-message" class="error-message" style="display: none;"></div>
+    <div id="loading" class="loading" style="display: none;">Loading plants...</div>
+    <div class="plant-grid" id="plants-container">
+      <!-- Plants will be loaded here -->
+    </div>
+  </div>
+
+  <script>
+    // ===== CORS PROXY SOLUTION =====
+    // Option 1: Use a free CORS proxy (replace with your preferred service)
+const CORS_PROXY = "https://api.allorigins.win/raw?url=";     // Alternative proxies: 
+    // - "https://api.allorigins.win/raw?url="
+    // - "https://thingproxy.freeboard.io/fetch/"
+
+    // Trefle API Configuration
+    const TREFLE_API_TOKEN = "4r9nbVeGyTMRrY30xKicvTpXm0Zj4xXPV2UKG6yl8ac";
+    const TREFLE_BASE_URL = "https://trefle.io/api/v1";
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const authToken = localStorage.getItem('clientToken');
+      
+      // Redirect if not authenticated
+      if (!authToken) {
+        window.location.href = '/client/login';
+        return;
+      }
+
+      // Load default plants (tomatoes) on page load
+      loadPlants('tomato');
+
+      // Logout handler
+      document.getElementById('client-logout').addEventListener('click', () => {
+        localStorage.removeItem('clientToken');
+        window.location.href = '/client/login';
+      });
+    });
+
+    async function searchPlants() {
+      const searchInput = document.getElementById('plant-search').value;
+      if (searchInput.trim() === '') {
+        showError('Please enter a search term');
+        return;
+      }
+      loadPlants(searchInput);
+    }
+
+    async function loadPlants(query = 'tomato') {
+      const loadingElement = document.getElementById('loading');
+      const plantsContainer = document.getElementById('plants-container');
+      
+      try {
+        // Show loading state
+        loadingElement.style.display = 'block';
+        plantsContainer.innerHTML = '';
+        hideError();
+
+        // ===== KEY CHANGE: Use CORS proxy =====
+        const proxyUrl = `${CORS_PROXY}${TREFLE_BASE_URL}/plants?token=${TREFLE_API_TOKEN}&q=${encodeURIComponent(query)}`;
+        const response = await fetch(proxyUrl, {
+          headers: {
+            // Some proxies require headers
+            'X-Requested-With': 'XMLHttpRequest'
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch plants. Proxy may be down.');
+        }
+
+        const data = await response.json();
+        
+        if (!data.data || data.data.length === 0) {
+          plantsContainer.innerHTML = '<p>No plants found</p>';
+          return;
+        }
+
+        renderPlants(data.data);
+      } catch (error) {
+        console.error('Error:', error);
+        showError(error.message || 'Failed to load plants. Try another proxy.');
+      } finally {
+        loadingElement.style.display = 'none';
+      }
+    }
+
+    // Rest of your functions remain unchanged
+    function renderPlants(plants) {
+      const plantsContainer = document.getElementById('plants-container');
+      plantsContainer.innerHTML = '';
+
+      plants.forEach(plant => {
+        const card = document.createElement('div');
+        card.className = 'plant-card';
+        card.innerHTML = `
+          <h3>${plant.common_name || 'Untitled Plant'}</h3>
+          <p><strong>Scientific Name:</strong> ${plant.scientific_name || 'N/A'}</p>
+          <p><strong>Family:</strong> ${plant.family || 'N/A'}</p>
+          ${plant.image_url ? `<img src="${plant.image_url}" alt="${plant.common_name}" style="max-width: 100%;">` : ''}
+          <button onclick="viewPlantDetails(${plant.id})">View Details</button>
+        `;
+        plantsContainer.appendChild(card);
+      });
+    }
+
+    async function viewPlantDetails(plantId) {
+      try {
+        const proxyUrl = `${CORS_PROXY}${TREFLE_BASE_URL}/species/${plantId}?token=${TREFLE_API_TOKEN}`;
+        const response = await fetch(proxyUrl);
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch plant details');
+        }
+
+        const plant = await response.json();
+        alert(`Plant Details:\n\nName: ${plant.data.common_name}\nScientific Name: ${plant.data.scientific_name}\nFamily: ${plant.data.family}`);
+      } catch (error) {
+        console.error('Error:', error);
+        showError('Failed to load plant details');
+      }
+    }
+
+    function showError(message) {
+      const errorElement = document.getElementById('error-message');
+      errorElement.textContent = message;
+      errorElement.style.display = 'block';
+    }
+
+    function hideError() {
+      document.getElementById('error-message').style.display = 'none';
+    }
+  </script>
+</body>
+</html>

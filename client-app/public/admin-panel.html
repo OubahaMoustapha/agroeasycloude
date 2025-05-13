@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Panel</title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+  <style>
+    :root {
+      --sidebar-width: 250px;
+      --header-height: 60px;
+      --primary-color: #4e73df;
+      --secondary-color: #f8f9fc;
+    }
+    
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+    }
+    
+    .admin-container {
+      display: flex;
+      min-height: 100vh;
+    }
+    
+    /* Sidebar Styles */
+    .sidebar {
+      width: var(--sidebar-width);
+      background: var(--primary-color);
+      color: white;
+      height: 100vh;
+      position: fixed;
+      transition: all 0.3s;
+    }
+    
+    .sidebar-header {
+      padding: 20px;
+      background: rgba(0, 0, 0, 0.1);
+    }
+    
+    .sidebar-menu {
+      padding: 0;
+      list-style: none;
+    }
+    
+    .sidebar-menu li {
+      padding: 10px 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .sidebar-menu li a {
+      color: white;
+      text-decoration: none;
+      display: block;
+    }
+    
+    .sidebar-menu li a i {
+      margin-right: 10px;
+    }
+    
+    .sidebar-menu li:hover {
+      background: rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Main Content Styles */
+    .main-content {
+      margin-left: var(--sidebar-width);
+      width: calc(100% - var(--sidebar-width));
+    }
+    
+    .header {
+      height: var(--header-height);
+      background: white;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 20px;
+    }
+    
+    .content {
+      padding: 20px;
+    }
+    
+    /* Form and Table Styles */
+    .form-container, .client-form, .table-container { 
+      margin: 20px 0; 
+    }
+    
+    input, button { 
+      padding: 8px; 
+      margin: 5px; 
+    }
+    
+    .error-message { 
+      color: red; 
+    }
+    
+    table { 
+      width: 100%; 
+      border-collapse: collapse; 
+    }
+    
+    th, td { 
+      border: 1px solid #ccc; 
+      padding: 8px; 
+      text-align: left; 
+    }
+    
+    .action-btn { 
+      margin-right: 5px; 
+    }
+    
+    .logout-btn {
+      background: #e74a3b;
+      color: white;
+      border: none;
+      padding: 8px 15px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="admin-container">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="sidebar-header">
+        <h2>Admin Panel</h2>
+      </div>
+      <ul class="sidebar-menu">
+        <li><a href="/admin/dashboard"><i class="fas fa-users"></i> Clients</a></li>
+        <li><a href="/admin/products"><i class="fas fa-box"></i> Products</a></li>
+        <li><a href="/admin/plants" class="active"><i class="fas fa-leaf"></i> Plants</a></li>
+      </ul>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      <div class="header">
+        <h2>Client Management</h2>
+        <button id="logout-btn" class="logout-btn">Logout</button>
+      </div>
+
+      <div class="content">
+        <!-- New Client Form -->
+        <div class="client-form">
+          <h2>Add New Client</h2>
+          <form id="new-client-form">
+            <input type="text" id="client-nom" placeholder="First Name" required />
+            <input type="text" id="client-prenom" placeholder="Last Name" required />
+            <input type="text" id="client-adresse" placeholder="Address" required>
+            <input type="text" id="client-cin" placeholder="CIN" required>
+            <input type="email" id="client-email" placeholder="Email" required />
+            <input type="text" id="client-tel" placeholder="Phone" required />
+            <input type="password" id="client-password" placeholder="Password" required />
+
+            <button type="submit">Add Client</button>
+          </form>
+        </div>
+
+        <!-- Client Table -->
+        <div class="table-container">
+          <table id="clients-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>cin</th>
+                <th>adreess</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/admin-panel.js"></script>
+</body>
+</html>

@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  auth-service:
+    build: ./auth-service
+    ports:
+      - "4000:3001"
+    environment:
+      - MONGO_URI=mongodb+srv://moubaha2000:oubaha123@cluster0.ejp0pqe.mongodb.net/agroeasy?retryWrites=true&w=majority&appName=Cluster0
+    restart: unless-stopped
+
+  product-service:
+    build: ./product-service
+    ports:
+      - "4002:3003"
+    environment:
+      - AUTH_SERVICE_URL=http://auth-service:3001
+      - MONGO_URI=mongodb+srv://moubaha2000:oubaha123@cluster0.ejp0pqe.mongodb.net/agroeasy?retryWrites=true&w=majority&appName=Cluster0
+    depends_on:
+      - auth-service
+    restart: unless-stopped
+
+  client-app:
+    build: ./client-app
+    ports:
+      - "4001:3002"
+    depends_on:
+      - auth-service
+      - product-service
+    restart: unless-stopped
+
+  plant-service:
+    build: ./plant-service
+    ports:
+      - "4003:3004"
+    environment:
+      - AUTH_SERVICE_URL=http://auth-service:3001
+      - MONGO_URI=mongodb+srv://moubaha2000:oubaha123@cluster0.ejp0pqe.mongodb.net/agroeasy?retryWrites=true&w=majority&appName=Cluster0
+    depends_on:
+      - auth-service
+    restart: unless-stopped

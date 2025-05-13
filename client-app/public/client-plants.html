@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Plants</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
+    .sidebar { width: 200px; background: #333; position: fixed; height: 100%; padding: 20px; color: white; }
+    .sidebar a { color: white; text-decoration: none; display: block; padding: 10px; margin: 5px 0; }
+    .sidebar a:hover { background: #4CAF50; }
+    .main-content { margin-left: 220px; padding: 20px; }
+    .header { background: #f1f1f1; padding: 10px 20px; display: flex; justify-content: space-between; }
+    .logout-btn { background: #f44336; color: white; border: none; padding: 8px 15px; cursor: pointer; }
+    .profile-btn { background: #4CAF50; color: white; border: none; padding: 8px 15px; cursor: pointer; }
+    .plant-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; }
+    .plant-card { border: 1px solid #ddd; padding: 15px; border-radius: 5px; }
+    .error-message { color: red; padding: 10px; background: #ffeeee; margin-bottom: 20px; }
+    .loading { text-align: center; padding: 20px; }
+  </style>
+</head>
+<body>
+  <div class="sidebar">
+    <h2>Menu</h2>
+    <a href="/client/products">Products</a>
+    <a href="/client/plants">Plants</a>
+    <a href="/client/other-plants">Plants +</a>
+    <a href="/client/profile">My Profile</a>
+  </div>
+  <div class="main-content">
+    <div class="header">
+      <h1>Plants</h1>
+      <div>
+        <button class="profile-btn" onclick="window.location.href='/client/profile'">Profile</button>
+        <button class="logout-btn" id="client-logout">Logout</button>
+      </div>
+    </div>
+
+    <div id="error-message" class="error-message" style="display: none;"></div>
+    <div id="loading" class="loading">Loading plants...</div>
+    <div class="plant-grid" id="plants-container">
+      <!-- Plants will be loaded here -->
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const API_BASE_URL = "http://localhost:4003/api/plants/client";
+      const authToken = localStorage.getItem('clientToken');
+      const errorElement = document.getElementById('error-message');
+      const loadingElement = document.getElementById('loading');
+      const plantsContainer = document.getElementById('plants-container');
+      console.log(authToken)
+      // Redirect if not authenticated
+      if (!authToken) {
+        window.location.href = '/client/login';
+        return;
+      }
+
+      // Load plants
+      loadPlants();
+
+      async function loadPlants() {
+        try {
+          const response = await fetch(API_BASE_URL, {
+            headers: { 
+              'Authorization': `Bearer ${authToken}`,
+              'Content-Type': 'application/json'
+            }
+          });
+
+          if (response.status === 401) {
+            handleUnauthorized();
+            return;
+          }
+
+          if (!response.ok) {
+            throw new Error('Failed to fetch plants');
+          }
+
+          const plants = await response.json();
+
+          if (!Array.isArray(plants)) {
+            throw new Error('Invalid plant data received');
+          }
+
+          renderPlants(plants);
+        } catch (error) {
+          console.error('Error:', error);
+          showError(error.message);
+        } finally {
+          loadingElement.style.display = 'none';
+        }
+      }
+
+      function renderPlants(plants) {
+        plantsContainer.innerHTML = '';
+
+        if (plants.length === 0) {
+          plantsContainer.innerHTML = '<p>No plants available</p>';
+          return;
+        }
+
+        plants.forEach(plant => {
+          const card = document.createElement('div');
+          card.className = 'plant-card';
+          card.innerHTML = `
+            <h3>${plant.titre || 'Untitled'}</h3>
+            <p><strong>Plantation Info:</strong> ${plant.info_plantation || 'N/A'}</p>
+            <p><strong>Materials Info:</strong> ${plant.info_materiaux || 'N/A'}</p>
+            <p><strong>Watering Info:</strong> ${plant.info_arrosage || 'N/A'}</p>
+            <p><strong>Climate Info:</strong> ${plant.info_climat || 'N/A'}</p>
+          `;
+          plantsContainer.appendChild(card);
+        });
+      }
+
+      document.getElementById('client-logout').addEventListener('click', () => {
+        localStorage.removeItem('clientToken');
+        window.location.href = '/client/login';
+      });
+
+      function showError(message) {
+        errorElement.textContent = message;
+        errorElement.style.display = 'block';
+        setTimeout(() => {
+          errorElement.style.display = 'none';
+        }, 5000);
+      }
+
+      function handleUnauthorized() {
+        localStorage.removeItem('clientToken');
+        window.location.href = '/client/login';
+      }
+    });
+  </script>
+</body>
+</html>

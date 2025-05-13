@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Plant Panel</title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+  <style>
+    :root {
+      --sidebar-width: 250px;
+      --header-height: 60px;
+      --primary-color: #4e73df;
+      --secondary-color: #f8f9fc;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    .admin-container {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      width: var(--sidebar-width);
+      background: var(--primary-color);
+      color: white;
+      height: 100vh;
+      position: fixed;
+    }
+
+    .sidebar-header {
+      padding: 20px;
+      background: rgba(0, 0, 0, 0.1);
+    }
+
+    .sidebar-menu {
+      padding: 0;
+      list-style: none;
+    }
+
+    .sidebar-menu li {
+      padding: 10px 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .sidebar-menu li a {
+      color: white;
+      text-decoration: none;
+      display: block;
+    }
+
+    .sidebar-menu li a i {
+      margin-right: 10px;
+    }
+
+    .sidebar-menu li:hover {
+      background: rgba(0, 0, 0, 0.1);
+    }
+
+    .main-content {
+      margin-left: var(--sidebar-width);
+      width: calc(100% - var(--sidebar-width));
+    }
+
+    .header {
+      height: var(--header-height);
+      background: white;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 20px;
+    }
+
+    .content {
+      padding: 20px;
+    }
+
+    .plant-form {
+      background: white;
+      padding: 20px;
+      border-radius: 5px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+    }
+
+    .plant-form input,
+    .plant-form textarea {
+      margin: 5px;
+      padding: 8px;
+      width: calc(100% - 20px);
+    }
+
+    .plant-form textarea {
+      min-height: 100px;
+    }
+
+    .plant-form button {
+      margin: 5px;
+      padding: 8px 15px;
+      background: #4e73df;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .table-container {
+      background: white;
+      padding: 20px;
+      border-radius: 5px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #f8f9fc;
+    }
+
+    .action-btn {
+      padding: 5px 10px;
+      margin-right: 5px;
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+
+    .save-btn {
+      background: #4e73df;
+      color: white;
+    }
+
+    .delete-btn {
+      background: #e74a3b;
+      color: white;
+    }
+
+    .logout-btn {
+      background: #e74a3b;
+      color: white;
+      border: none;
+      padding: 8px 15px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    [contenteditable="true"] {
+      padding: 5px;
+      border: 1px solid transparent;
+    }
+
+    [contenteditable="true"]:focus {
+      border: 1px solid #4e73df;
+      background: #f8f9fc;
+      outline: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="admin-container">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="sidebar-header">
+        <h2>Admin Panel</h2>
+      </div>
+      <ul class="sidebar-menu">
+        <li><a href="/admin/dashboard"><i class="fas fa-users"></i> Clients</a></li>
+        <li><a href="/admin/products"><i class="fas fa-box"></i> Products</a></li>
+        <li><a href="/admin/plants" class="active"><i class="fas fa-leaf"></i> Plants</a></li>
+      </ul>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      <div class="header">
+        <h2>Plant Management</h2>
+        <button id="logout-btn" class="logout-btn">Logout</button>
+      </div>
+
+      <div class="content">
+        <!-- New Plant Form -->
+        <div class="plant-form">
+          <h2>Add New Plant</h2>
+          <form id="plant-form">
+            <input type="text" id="plant-titre" placeholder="Title" required />
+            <textarea id="plant-plantation" placeholder="Plantation Information" required></textarea>
+            <textarea id="plant-materiaux" placeholder="Materials Information" required></textarea>
+            <textarea id="plant-arrosage" placeholder="Watering Information" required></textarea>
+            <textarea id="plant-climat" placeholder="Climate Information" required></textarea>
+            <button type="submit">Add Plant</button>
+          </form>
+        </div>
+
+        <!-- Plant Table -->
+        <div class="table-container">
+          <table id="plant-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Title</th>
+                <th>Plantation Info</th>
+                <th>Materials Info</th>
+                <th>Watering Info</th>
+                <th>Climate Info</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/plant.js"></script>
+</body>
+</html>

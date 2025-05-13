@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Profile</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
+    .sidebar { width: 200px; background: #333; position: fixed; height: 100%; padding: 20px; color: white; }
+    .sidebar a { color: white; text-decoration: none; display: block; padding: 10px; margin: 5px 0; }
+    .sidebar a:hover { background: #4CAF50; }
+    .main-content { margin-left: 220px; padding: 20px; }
+    .header { background: #f1f1f1; padding: 10px 20px; display: flex; justify-content: space-between; }
+    .logout-btn { background: #f44336; color: white; border: none; padding: 8px 15px; cursor: pointer; }
+    .profile-info { margin-top: 20px; }
+    .profile-info p { margin: 10px 0; }
+  </style>
+</head>
+<body>
+  <div class="sidebar">
+    <h2>Menu</h2>
+    <a href="/client/products">Products</a>
+    <a href="/client/plants">Plants</a>
+    <a href="/client/other-plants">Plants +</a>
+    <a href="/client/profile">My Profile</a>
+  </div>
+
+  <div class="main-content">
+    <div class="header">
+      <h1>My Profile</h1>
+      <div>
+        <button class="logout-btn" id="client-logout">Logout</button>
+      </div>
+    </div>
+    
+    <div class="profile-info">
+      <h2>Personal Information</h2>
+      <p><strong>Name:</strong> <span id="client-name"></span></p>
+      <p><strong>Email:</strong> <span id="client-email"></span></p>
+      <p><strong>Phone:</strong> <span id="client-phone"></span></p>
+      <p><strong>Address:</strong> <span id="client-address"></span></p>
+      <p><strong>CIN:</strong> <span id="client-cin"></span></p>
+    </div>
+  </div>
+
+  <script>
+  document.addEventListener('DOMContentLoaded', async () => {
+    const token = localStorage.getItem('clientToken');
+
+    if (!token) {
+      alert('You are not logged in');
+      window.location.href = '/client/login'; // redirect to login page
+      return;
+    }
+
+    try {
+      const response = await fetch('http://localhost:4000/clients/me', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch profile');
+      }
+
+      const data = await response.json();
+
+      // Fill in profile data
+      document.getElementById('client-name').textContent = data.nom + ' ' + data.prenom;
+      document.getElementById('client-email').textContent = data.email;
+      document.getElementById('client-phone').textContent = data.tel;
+      document.getElementById('client-address').textContent = data.adresse;
+      document.getElementById('client-cin').textContent = data.cin;
+
+    } catch (err) {
+      console.error(err);
+      alert('Error loading profile');
+    }
+  });
+
+  // Logout handler
+  document.getElementById('client-logout').addEventListener('click', () => {
+        localStorage.removeItem('clientToken');
+        window.location.href = '/client/login';
+      });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Panel</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link rel="stylesheet" href="/css/style.css" />
+  <style>
+    :root {
+      --primary-color: #4e73df;
+      --secondary-color: #f8f9fc;
+      --success-color: #1cc88a;
+      --danger-color: #e74a3b;
+      --text-color: #5a5c69;
+      --border-color: #e3e6f0;
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--secondary-color);
+      color: var(--text-color);
+      line-height: 1.6;
+    }
+    
+    .hidden { display: none; }
+    
+    /* Login Form Styles */
+    #login-form {
+      max-width: 400px;
+      margin: 100px auto;
+      padding: 40px;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+    
+    #login-form h1 {
+      margin-bottom: 30px;
+      color: var(--primary-color);
+    }
+    
+    #login-form input {
+      width: 100%;
+      padding: 12px 15px;
+      margin: 10px 0;
+      border: 1px solid var(--border-color);
+      border-radius: 5px;
+      font-size: 16px;
+      transition: border 0.3s;
+    }
+    
+    #login-form input:focus {
+      outline: none;
+      border-color: var(--primary-color);
+    }
+    
+    #login-form button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 20px;
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    
+    #login-form button:hover {
+      background-color: #3a5bc7;
+    }
+    
+    .error-message {
+      color: var(--danger-color);
+      margin-top: 15px;
+      font-size: 14px;
+    }
+    
+    /* Admin Panel Styles */
+    #admin-panel {
+      padding: 20px;
+    }
+    
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid var(--border-color);
+    }
+    
+    .header h1 {
+      color: var(--primary-color);
+    }
+    
+    #logout-btn {
+      padding: 8px 20px;
+      background-color: var(--danger-color);
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    
+    #logout-btn:hover {
+      background-color: #c23a2d;
+    }
+    
+    /* Form Styles */
+    .client-form {
+      background: white;
+      padding: 25px;
+      border-radius: 8px;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+      margin-bottom: 30px;
+    }
+    
+    .client-form h2 {
+      margin-bottom: 20px;
+      color: var(--primary-color);
+    }
+    
+    #new-client-form {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 15px;
+    }
+    
+    #new-client-form input {
+      padding: 10px 15px;
+      border: 1px solid var(--border-color);
+      border-radius: 5px;
+      font-size: 14px;
+    }
+    
+    #new-client-form input:focus {
+      outline: none;
+      border-color: var(--primary-color);
+    }
+    
+    #new-client-form button {
+      grid-column: 1 / -1;
+      padding: 12px;
+      background-color: var(--success-color);
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    
+    #new-client-form button:hover {
+      background-color: #17a673;
+    }
+    
+    /* Table Styles */
+    .table-container {
+      background: white;
+      padding: 25px;
+      border-radius: 8px;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+      overflow-x: auto;
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+    
+    th, td {
+      padding: 12px 15px;
+      text-align: left;
+      border-bottom: 1px solid var(--border-color);
+    }
+    
+    th {
+      background-color: var(--primary-color);
+      color: white;
+      font-weight: 600;
+    }
+    
+    tr:hover {
+      background-color: rgba(78, 115, 223, 0.05);
+    }
+    
+    td[contenteditable="true"]:focus {
+      outline: 2px solid var(--primary-color);
+      background-color: rgba(78, 115, 223, 0.1);
+      border-radius: 4px;
+    }
+    
+    .action-btn {
+      padding: 6px 12px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: opacity 0.3s;
+    }
+    
+    .action-btn:hover {
+      opacity: 0.9;
+    }
+    
+    .save-btn {
+      background-color: var(--primary-color);
+      color: white;
+      margin-right: 8px;
+    }
+    
+    .delete-btn {
+      background-color: var(--danger-color);
+      color: white;
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      #login-form {
+        margin: 50px 20px;
+        padding: 30px;
+      }
+      
+      #new-client-form {
+        grid-template-columns: 1fr;
+      }
+      
+      table {
+        display: block;
+        overflow-x: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Login Form -->
+  <div id="login-form" class="form-container">
+    <h1><i class="fas fa-lock"></i> Admin Login</h1>
+    <form id="login">
+      <input type="text" id="login-username" placeholder="Username" required />
+      <input type="password" id="login-password" placeholder="Password" required />
+      <button type="submit"><i class="fas fa-sign-in-alt"></i> Login</button>
+    </form>
+    <p id="login-error" class="error-message"></p>
+  </div>
+
+  <!-- Admin Panel -->
+  <div id="admin-panel" class="hidden">
+    <div class="header">
+      <h1><i class="fas fa-users-cog"></i> Client Management</h1>
+      <button id="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</button>
+    </div>
+
+    <!-- New Client Form -->
+    <div class="client-form">
+      <h2><i class="fas fa-user-plus"></i> Add New Client</h2>
+      <form id="new-client-form">
+        <input type="text" id="client-nom" placeholder="First Name" required />
+        <input type="text" id="client-prenom" placeholder="Last Name" required />
+        <input type="text" id="client-adresse" placeholder="Address" required>
+        <input type="text" id="client-cin" placeholder="CIN" required>
+        <input type="email" id="client-email" placeholder="Email" required />
+        <input type="text" id="client-tel" placeholder="Phone" required />
+        <input type="password" id="client-password" placeholder="Password" required />
+
+        <button type="submit"><i class="fas fa-plus-circle"></i> Add Client</button>
+      </form>
+    </div>
+
+    <!-- Client Table -->
+    <div class="table-container">
+      <table id="clients-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>CIN</th>
+            <th>Address</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script src="/js/admin-login.js"></script>
+</body>
+</html>
